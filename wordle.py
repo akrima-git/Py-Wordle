@@ -17,7 +17,8 @@ KEYBOARD = [
     "ZXCVBNM"
 ]
 
-correct_chars_streak = []
+correct_chars_streak = []  # Stores the feedback (🟩, 🟧, ⬜)
+guesses = []  # Stores the actual guessed words
 letter_states = {}  # Tracks the state of each letter (gray, yellow, green)
 
 def colorize_letter(letter, bg_color):
@@ -95,25 +96,23 @@ def validation(guess, word):
     
     result = "".join(feedback)
     correct_chars_streak.append(result)
+    guesses.append(guess)  # Store the current guess
     
     # Print the current guess with colored backgrounds
     print("\nGuess:", " ".join(display_chars))
     
     # Print guess history with consistent colors
     print("\nGuess history:")
-    current_guess = 0
-    for history in correct_chars_streak:
+    for past_guess, history in zip(guesses, correct_chars_streak):
         colored_word = []
-        current_guess_word = guess if current_guess == len(correct_chars_streak) - 1 else guess
-        for i, (current_word_char, feedback_char) in enumerate(zip(current_guess_word, history)):
+        for past_char, feedback_char in zip(past_guess, history):
             if feedback_char == "🟩":
-                colored_word.append(colorize_letter(current_word_char, GREEN_BG))
+                colored_word.append(colorize_letter(past_char, GREEN_BG))
             elif feedback_char == "🟧":
-                colored_word.append(colorize_letter(current_word_char, YELLOW_BG))
+                colored_word.append(colorize_letter(past_char, YELLOW_BG))
             else:
-                colored_word.append(colorize_letter(current_word_char, BLACK_BG))  # Always use black for incorrect letters
+                colored_word.append(colorize_letter(past_char, BLACK_BG))  # Always use black for incorrect letters
         print(" ".join(colored_word))
-        current_guess += 1
     
     # Display keyboard with updated letter states
     display_keyboard()
@@ -127,8 +126,9 @@ def guessing_game():
     selected_word, word_list = generate_word()
     guess_counter = 0
     
-    # Clear previous game's streak and letter states
+    # Clear previous game's data
     correct_chars_streak.clear()
+    guesses.clear()
     letter_states.clear()
     
     print("\nWelcome to Wordle!")
